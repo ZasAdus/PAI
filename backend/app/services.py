@@ -164,14 +164,13 @@ def get_player(player_id: int) -> PlayerSummary | None:
 def search_players(
     query: str,
     limit: int = 50,
-    search_by: SearchBy = "name",
 ) -> list[PlayerSummary]:
+    """Search players by name or club - unified search that matches both."""
     normalized = query.strip()
     if not normalized:
         return list_players(limit=limit)
 
-    safe_search_by = search_by if search_by in {"name", "club", "league", "position"} else "name"
-    cache_key = f"{SEARCH_CACHE_PREFIX}:{safe_search_by}:{normalized.lower()}:{limit}"
+    cache_key = f"{SEARCH_CACHE_PREFIX}:{normalized.lower()}:{limit}"
     cached = cache_get_json(cache_key)
     if cached:
         return [_player_summary_from_dict(item) for item in cached]
@@ -180,65 +179,27 @@ def search_players(
     like_query = f"{normalized}%"
     contains_query = f"%{normalized}%"
 
-    if safe_search_by == "club":
-        where_clause = """
-            WHERE LOWER(p.current_club_name) LIKE LOWER(:like_query)
-               OR LOWER(p.current_club_name) LIKE LOWER(:contains_query)
-        """
-        order_clause = """
-            ORDER BY
-                CASE
-                    WHEN LOWER(p.current_club_name) = LOWER(:exact_query) THEN 0
-                    WHEN LOWER(p.current_club_name) LIKE LOWER(:like_query) THEN 1
-                    ELSE 2
-                END,
-                p.player_name ASC
-        """
-    elif safe_search_by == "league":
-        where_clause = """
-            WHERE LOWER(COALESCE(comp.competition_name, c.competition_name, '')) LIKE LOWER(:like_query)
-               OR LOWER(COALESCE(comp.competition_name, c.competition_name, '')) LIKE LOWER(:contains_query)
-        """
-        order_clause = """
-            ORDER BY
-                CASE
-                    WHEN LOWER(COALESCE(comp.competition_name, c.competition_name, '')) = LOWER(:exact_query) THEN 0
-                    WHEN LOWER(COALESCE(comp.competition_name, c.competition_name, '')) LIKE LOWER(:like_query) THEN 1
-                    ELSE 2
-                END,
-                p.player_name ASC
-        """
-    elif safe_search_by == "position":
-        where_clause = """
-            WHERE LOWER(COALESCE(p.main_position, p.position, '')) LIKE LOWER(:like_query)
-               OR LOWER(COALESCE(p.main_position, p.position, '')) LIKE LOWER(:contains_query)
-               OR LOWER(COALESCE(p.position, '')) LIKE LOWER(:contains_query)
-        """
-        order_clause = """
-            ORDER BY
-                CASE
-                    WHEN LOWER(COALESCE(p.main_position, p.position, '')) = LOWER(:exact_query) THEN 0
-                    WHEN LOWER(COALESCE(p.main_position, p.position, '')) LIKE LOWER(:like_query) THEN 1
-                    ELSE 2
-                END,
-                p.player_name ASC
-        """
-    else:
-        where_clause = """
-            WHERE LOWER(p.player_name) LIKE LOWER(:like_query)
-               OR LOWER(p.player_slug) LIKE LOWER(:like_query)
-               OR LOWER(p.player_name) LIKE LOWER(:contains_query)
-        """
-        order_clause = """
-            ORDER BY
-                CASE
-                    WHEN LOWER(p.player_name) = LOWER(:exact_query) THEN 0
-                    WHEN LOWER(p.player_name) LIKE LOWER(:like_query) THEN 1
-                    WHEN LOWER(p.player_slug) LIKE LOWER(:like_query) THEN 2
-                    ELSE 3
-                END,
-                p.player_name ASC
-        """
+    # Unified search: matches player name OR club name
+    where_clause = """
+        WHERE (
+            LOWER(p.player_name) LIKE LOWER(:like_query)
+            OR LOWER(p.player_slug) LIKE LOWER(:like_query)
+            OR LOWER(p.player_name) LIKE LOWER(:contains_query)
+            OR LOWER(p.current_club_name) LIKE LOWER(:like_query)
+            OR LOWER(p.current_club_name) LIKE LOWER(:contains_query)
+        )
+    """
+    order_clause = """
+        ORDER BY
+            CASE
+                WHEN LOWER(p.player_name) = LOWER(:exact_query) THEN 0
+                WHEN LOWER(p.current_club_name) = LOWER(:exact_query) THEN 1
+                WHEN LOWER(p.player_name) LIKE LOWER(:like_query) THEN 2
+                WHEN LOWER(p.current_club_name) LIKE LOWER(:like_query) THEN 3
+                ELSE 4
+            END,
+            p.player_name ASC
+    """
 
     rows = fetch_all(
         f"""

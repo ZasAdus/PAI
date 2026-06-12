@@ -1,29 +1,16 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import LoadingSpinner from './LoadingSpinner';
 import { fetchJson } from '../../../api/api';
 
-const SEARCH_MODES = [
-	{ id: 'name', label: 'Nazwisko', placeholder: 'Wpisz nazwisko zawodnika...' },
-	{ id: 'club', label: 'Klub', placeholder: 'Wpisz nazwę klubu...' },
-	{ id: 'league', label: 'Liga', placeholder: 'Wpisz nazwę ligi...' },
-	{ id: 'position', label: 'Pozycja', placeholder: 'Wpisz pozycję, np. Defender...' },
-];
-
 export default function PlayerSearch({ onSelect, disabled = false }) {
 	const [query, setQuery] = useState('');
-	const [searchBy, setSearchBy] = useState('name');
 	const [items, setItems] = useState([]);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState('');
 	const [open, setOpen] = useState(false);
 	const shellRef = useRef(null);
-
-	const activeMode = useMemo(
-		() => SEARCH_MODES.find((mode) => mode.id === searchBy) || SEARCH_MODES[0],
-		[searchBy],
-	);
 
 	useEffect(() => {
 		function handleClickOutside(event) {
@@ -55,7 +42,6 @@ export default function PlayerSearch({ onSelect, disabled = false }) {
 				setError('');
 				const params = new URLSearchParams({
 					q: normalizedQuery,
-					search_by: searchBy,
 				});
 				const response = await fetchJson(`/players/search?${params.toString()}`);
 				setItems(response.items || []);
@@ -69,7 +55,7 @@ export default function PlayerSearch({ onSelect, disabled = false }) {
 		}, 220);
 
 		return () => window.clearTimeout(timeoutId);
-	}, [disabled, normalizedQuery, searchBy]);
+	}, [disabled, normalizedQuery]);
 
 	function handleSelect(item) {
 		setQuery(item.player_name);
@@ -79,25 +65,6 @@ export default function PlayerSearch({ onSelect, disabled = false }) {
 
 	return (
 		<div className="search-shell" ref={shellRef}>
-			<div className="search-mode-row" role="tablist" aria-label="Tryb wyszukiwania">
-				{SEARCH_MODES.map((mode) => (
-					<button
-						key={mode.id}
-						type="button"
-						role="tab"
-						aria-selected={searchBy === mode.id}
-						className={searchBy === mode.id ? 'search-mode-btn active' : 'search-mode-btn'}
-						onClick={() => {
-							setSearchBy(mode.id);
-							setOpen(Boolean(normalizedQuery));
-						}}
-						disabled={disabled}
-					>
-						{mode.label}
-					</button>
-				))}
-			</div>
-
 			<input
 				className="search-input"
 				value={query}
@@ -106,7 +73,7 @@ export default function PlayerSearch({ onSelect, disabled = false }) {
 					setOpen(true);
 				}}
 				onFocus={() => setOpen(true)}
-				placeholder={activeMode.placeholder}
+				placeholder="Wpisz nazwisko zawodnika lub nazwę klubu..."
 				autoComplete="off"
 				disabled={disabled}
 			/>

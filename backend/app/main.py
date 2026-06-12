@@ -91,9 +91,8 @@ def read_users_me(current_user: dict = Depends(auth.get_current_user)):
 def search_players(
     q: str = Query(..., min_length=1),
     limit: int = Query(50, ge=1, le=50),
-    search_by: services.SearchBy = "name",
 ):
-    items = services.search_players(q, limit=limit, search_by=search_by)
+    items = services.search_players(q, limit=limit)
     return {"items": [p.dict() for p in items]}
 
 
