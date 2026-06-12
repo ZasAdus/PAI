@@ -13,22 +13,23 @@ app = FastAPI(title="GuessThePlayer API")
 
 @app.on_event("startup")
 def startup_event():
-    # Run seed script on startup to ensure mock data is always available
     import os
-    from .database import get_engine, text
-    seed_path = os.path.join(os.path.dirname(__file__), "..", "seeds", "seed_data.sql")
-    if os.path.exists(seed_path):
-        print("Running seed data script...", file=sys.stderr)
+    seed_path = os.path.join(os.path.dirname(__file__), "..", "seeds", "mock_results.sql")
+    if not os.path.exists(seed_path):
+        return
+
+    try:
         with open(seed_path, "r", encoding="utf-8") as f:
             sql = f.read()
-            # Split by semicolon to execute one by one (simplified)
-            # Actually, SQLAlchemy begin() can handle multiple statements if supported by driver
-            try:
-                with get_engine().begin() as conn:
-                    conn.execute(text(sql))
-                print("Seed data loaded successfully.", file=sys.stderr)
-            except Exception as e:
-                print(f"Error loading seed data: {e}", file=sys.stderr)
+        raw = database.get_engine().raw_connection()
+        try:
+            with raw.cursor() as cursor:
+                cursor.execute(sql)
+            raw.commit()
+        finally:
+            raw.close()
+    except Exception as e:
+        print(f"Error loading mock results: {e}", file=sys.stderr)
 
 app.add_middleware(
     CORSMiddleware,
