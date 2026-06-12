@@ -1,3 +1,120 @@
+-- Mock data for leaderboard (password for all: "haslo123")
+-- Bcrypt hash of "haslo123": $2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/X4.FOGFhcJjv.QhKq
+INSERT INTO users (id, username, hashed_password) VALUES (999, 'MistrzPiłki', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/X4.FOGFhcJjv.QhKq') ON CONFLICT (id) DO NOTHING;
+INSERT INTO users (id, username, hashed_password) VALUES (1000, 'Kibic123', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/X4.FOGFhcJjv.QhKq') ON CONFLICT (id) DO NOTHING;
+INSERT INTO users (id, username, hashed_password) VALUES (1001, 'FutbolMaster', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/X4.FOGFhcJjv.QhKq') ON CONFLICT (id) DO NOTHING;
+INSERT INTO users (id, username, hashed_password) VALUES (1002, 'Striker99', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/X4.FOGFhcJjv.QhKq') ON CONFLICT (id) DO NOTHING;
+INSERT INTO users (id, username, hashed_password) VALUES (1003, 'GoalKeeper', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/X4.FOGFhcJjv.QhKq') ON CONFLICT (id) DO NOTHING;
+
+-- Mock game results with streak data
+-- Using fixed player_id 1 since players might not be loaded yet
+INSERT INTO game_results (user_id, session_id, date, attempts_used, solved, target_player_id) 
+SELECT 999, 'mock-session-1', CURRENT_DATE - INTERVAL '7 day', 4, true, 1
+WHERE NOT EXISTS (SELECT 1 FROM game_results WHERE user_id = 999 AND date = CURRENT_DATE - INTERVAL '7 day');
+
+INSERT INTO game_results (user_id, session_id, date, attempts_used, solved, target_player_id) 
+SELECT 999, 'mock-session-2', CURRENT_DATE - INTERVAL '6 day', 3, true, 1
+WHERE NOT EXISTS (SELECT 1 FROM game_results WHERE user_id = 999 AND date = CURRENT_DATE - INTERVAL '6 day');
+
+INSERT INTO game_results (user_id, session_id, date, attempts_used, solved, target_player_id) 
+SELECT 999, 'mock-session-3', CURRENT_DATE - INTERVAL '5 day', 2, true, 1
+WHERE NOT EXISTS (SELECT 1 FROM game_results WHERE user_id = 999 AND date = CURRENT_DATE - INTERVAL '5 day');
+
+INSERT INTO game_results (user_id, session_id, date, attempts_used, solved, target_player_id) 
+SELECT 999, 'mock-session-4', CURRENT_DATE - INTERVAL '4 day', 5, true, 1
+WHERE NOT EXISTS (SELECT 1 FROM game_results WHERE user_id = 999 AND date = CURRENT_DATE - INTERVAL '4 day');
+
+INSERT INTO game_results (user_id, session_id, date, attempts_used, solved, target_player_id) 
+SELECT 999, 'mock-session-5', CURRENT_DATE - INTERVAL '3 day', 1, true, 1
+WHERE NOT EXISTS (SELECT 1 FROM game_results WHERE user_id = 999 AND date = CURRENT_DATE - INTERVAL '3 day');
+
+INSERT INTO game_results (user_id, session_id, date, attempts_used, solved, target_player_id) 
+SELECT 999, 'mock-session-6', CURRENT_DATE - INTERVAL '2 day', 3, true, 1
+WHERE NOT EXISTS (SELECT 1 FROM game_results WHERE user_id = 999 AND date = CURRENT_DATE - INTERVAL '2 day');
+
+INSERT INTO game_results (user_id, session_id, date, attempts_used, solved, target_player_id) 
+SELECT 999, 'mock-session-7', CURRENT_DATE - INTERVAL '1 day', 4, true, 1
+WHERE NOT EXISTS (SELECT 1 FROM game_results WHERE user_id = 999 AND date = CURRENT_DATE - INTERVAL '1 day');
+
+INSERT INTO game_results (user_id, session_id, date, attempts_used, solved, target_player_id) 
+SELECT 999, 'mock-session-8', CURRENT_DATE, 2, true, 1
+WHERE NOT EXISTS (SELECT 1 FROM game_results WHERE user_id = 999 AND date = CURRENT_DATE);
+
+-- Kibic123 - casual player
+INSERT INTO game_results (user_id, session_id, date, attempts_used, solved, target_player_id) 
+SELECT 1000, 'mock-session-10', CURRENT_DATE - INTERVAL '2 day', 5, true, 1
+WHERE NOT EXISTS (SELECT 1 FROM game_results WHERE user_id = 1000 AND date = CURRENT_DATE - INTERVAL '2 day');
+
+INSERT INTO game_results (user_id, session_id, date, attempts_used, solved, target_player_id) 
+SELECT 1000, 'mock-session-11', CURRENT_DATE, 8, false, 1
+WHERE NOT EXISTS (SELECT 1 FROM game_results WHERE user_id = 1000 AND date = CURRENT_DATE);
+
+-- FutbolMaster - many wins but streak broken (lost yesterday)
+INSERT INTO game_results (user_id, session_id, date, attempts_used, solved, target_player_id)
+SELECT 1001, 'mock-session-20', CURRENT_DATE - INTERVAL '10 day', 3, true, 1
+WHERE NOT EXISTS (SELECT 1 FROM game_results WHERE user_id = 1001 AND date = CURRENT_DATE - INTERVAL '10 day');
+
+INSERT INTO game_results (user_id, session_id, date, attempts_used, solved, target_player_id)
+SELECT 1001, 'mock-session-21', CURRENT_DATE - INTERVAL '9 day', 4, true, 1
+WHERE NOT EXISTS (SELECT 1 FROM game_results WHERE user_id = 1001 AND date = CURRENT_DATE - INTERVAL '9 day');
+
+INSERT INTO game_results (user_id, session_id, date, attempts_used, solved, target_player_id)
+SELECT 1001, 'mock-session-22', CURRENT_DATE - INTERVAL '8 day', 2, true, 1
+WHERE NOT EXISTS (SELECT 1 FROM game_results WHERE user_id = 1001 AND date = CURRENT_DATE - INTERVAL '8 day');
+
+INSERT INTO game_results (user_id, session_id, date, attempts_used, solved, target_player_id)
+SELECT 1001, 'mock-session-23', CURRENT_DATE - INTERVAL '7 day', 5, true, 1
+WHERE NOT EXISTS (SELECT 1 FROM game_results WHERE user_id = 1001 AND date = CURRENT_DATE - INTERVAL '7 day');
+
+INSERT INTO game_results (user_id, session_id, date, attempts_used, solved, target_player_id)
+SELECT 1001, 'mock-session-24', CURRENT_DATE - INTERVAL '1 day', 8, false, 1
+WHERE NOT EXISTS (SELECT 1 FROM game_results WHERE user_id = 1001 AND date = CURRENT_DATE - INTERVAL '1 day');
+
+INSERT INTO game_results (user_id, session_id, date, attempts_used, solved, target_player_id)
+SELECT 1001, 'mock-session-25', CURRENT_DATE, 3, true, 1
+WHERE NOT EXISTS (SELECT 1 FROM game_results WHERE user_id = 1001 AND date = CURRENT_DATE);
+
+-- Striker99
+INSERT INTO game_results (user_id, session_id, date, attempts_used, solved, target_player_id) 
+SELECT 1002, 'mock-session-30', CURRENT_DATE - INTERVAL '1 day', 6, true, 1
+WHERE NOT EXISTS (SELECT 1 FROM game_results WHERE user_id = 1002 AND date = CURRENT_DATE - INTERVAL '1 day');
+
+INSERT INTO game_results (user_id, session_id, date, attempts_used, solved, target_player_id) 
+SELECT 1002, 'mock-session-31', CURRENT_DATE, 4, true, 1
+WHERE NOT EXISTS (SELECT 1 FROM game_results WHERE user_id = 1002 AND date = CURRENT_DATE);
+
+-- GoalKeeper - only loss
+INSERT INTO game_results (user_id, session_id, date, attempts_used, solved, target_player_id) 
+SELECT 1003, 'mock-session-40', CURRENT_DATE, 8, false, 1
+WHERE NOT EXISTS (SELECT 1 FROM game_results WHERE user_id = 1003 AND date = CURRENT_DATE);
+
+-- Calculate and store streak for each user (PostgreSQL syntax)
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'streak') THEN
+        ALTER TABLE users ADD COLUMN streak INT DEFAULT 0;
+    END IF;
+END $$;
+
+-- Reset streak values for all users
+UPDATE users SET streak = 0;
+
+-- MistrzPiłki: 8-day streak
+UPDATE users SET streak = 8 WHERE id = 999;
+
+-- FutbolMaster: 4-day streak  
+UPDATE users SET streak = 4 WHERE id = 1001;
+
+-- Striker99: 2-day streak
+UPDATE users SET streak = 2 WHERE id = 1002;
+
+-- Kibic123: 0 (lost today, only 1 previous win)
+UPDATE users SET streak = 0 WHERE id = 1000;
+
+-- GoalKeeper: 0 (never won)
+UPDATE users SET streak = 0 WHERE id = 1003;
+
+
 DROP TABLE IF EXISTS players;
 
 CREATE TABLE players (
@@ -187,102 +304,3 @@ DELETE FROM clubs
     NOT IN (SELECT club_id FROM competitions 
         WHERE competitions.competition_id IN ('ES1','GB1','L1','FR1','IT1') 
     AND season_id = '2025');
-
--- Mock data for leaderboard (password for all: "haslo123")
--- Bcrypt hash of "haslo123": $2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/X4.FOGFhcJjv.QhKq
-INSERT INTO users (id, username, hashed_password) VALUES (999, 'MistrzPiłki', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/X4.FOGFhcJjv.QhKq') ON CONFLICT (id) DO NOTHING;
-INSERT INTO users (id, username, hashed_password) VALUES (1000, 'Kibic123', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/X4.FOGFhcJjv.QhKq') ON CONFLICT (id) DO NOTHING;
-INSERT INTO users (id, username, hashed_password) VALUES (1001, 'FutbolMaster', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/X4.FOGFhcJjv.QhKq') ON CONFLICT (id) DO NOTHING;
-INSERT INTO users (id, username, hashed_password) VALUES (1002, 'Striker99', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/X4.FOGFhcJjv.QhKq') ON CONFLICT (id) DO NOTHING;
-INSERT INTO users (id, username, hashed_password) VALUES (1003, 'GoalKeeper', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/X4.FOGFhcJjv.QhKq') ON CONFLICT (id) DO NOTHING;
-
--- Mock game results with streak data
-INSERT INTO game_results (user_id, session_id, date, attempts_used, solved, target_player_id) 
-SELECT 999, 'mock-session-1', CURRENT_DATE - INTERVAL '7 day', 4, true, (SELECT player_id FROM players ORDER BY RANDOM() LIMIT 1)
-WHERE NOT EXISTS (SELECT 1 FROM game_results WHERE user_id = 999 AND date = CURRENT_DATE - INTERVAL '7 day');
-
-INSERT INTO game_results (user_id, session_id, date, attempts_used, solved, target_player_id) 
-SELECT 999, 'mock-session-2', CURRENT_DATE - INTERVAL '6 day', 3, true, (SELECT player_id FROM players ORDER BY RANDOM() LIMIT 1)
-WHERE NOT EXISTS (SELECT 1 FROM game_results WHERE user_id = 999 AND date = CURRENT_DATE - INTERVAL '6 day');
-
-INSERT INTO game_results (user_id, session_id, date, attempts_used, solved, target_player_id) 
-SELECT 999, 'mock-session-3', CURRENT_DATE - INTERVAL '5 day', 2, true, (SELECT player_id FROM players ORDER BY RANDOM() LIMIT 1)
-WHERE NOT EXISTS (SELECT 1 FROM game_results WHERE user_id = 999 AND date = CURRENT_DATE - INTERVAL '5 day');
-
-INSERT INTO game_results (user_id, session_id, date, attempts_used, solved, target_player_id) 
-SELECT 999, 'mock-session-4', CURRENT_DATE - INTERVAL '4 day', 5, true, (SELECT player_id FROM players ORDER BY RANDOM() LIMIT 1)
-WHERE NOT EXISTS (SELECT 1 FROM game_results WHERE user_id = 999 AND date = CURRENT_DATE - INTERVAL '4 day');
-
-INSERT INTO game_results (user_id, session_id, date, attempts_used, solved, target_player_id) 
-SELECT 999, 'mock-session-5', CURRENT_DATE - INTERVAL '3 day', 1, true, (SELECT player_id FROM players ORDER BY RANDOM() LIMIT 1)
-WHERE NOT EXISTS (SELECT 1 FROM game_results WHERE user_id = 999 AND date = CURRENT_DATE - INTERVAL '3 day');
-
-INSERT INTO game_results (user_id, session_id, date, attempts_used, solved, target_player_id) 
-SELECT 999, 'mock-session-6', CURRENT_DATE - INTERVAL '2 day', 3, true, (SELECT player_id FROM players ORDER BY RANDOM() LIMIT 1)
-WHERE NOT EXISTS (SELECT 1 FROM game_results WHERE user_id = 999 AND date = CURRENT_DATE - INTERVAL '2 day');
-
-INSERT INTO game_results (user_id, session_id, date, attempts_used, solved, target_player_id) 
-SELECT 999, 'mock-session-7', CURRENT_DATE - INTERVAL '1 day', 4, true, (SELECT player_id FROM players ORDER BY RANDOM() LIMIT 1)
-WHERE NOT EXISTS (SELECT 1 FROM game_results WHERE user_id = 999 AND date = CURRENT_DATE - INTERVAL '1 day');
-
-INSERT INTO game_results (user_id, session_id, date, attempts_used, solved, target_player_id) 
-SELECT 999, 'mock-session-8', CURRENT_DATE, 2, true, (SELECT player_id FROM players ORDER BY RANDOM() LIMIT 1)
-WHERE NOT EXISTS (SELECT 1 FROM game_results WHERE user_id = 999 AND date = CURRENT_DATE);
-
--- Kibic123 - casual player
-INSERT INTO game_results (user_id, session_id, date, attempts_used, solved, target_player_id) 
-SELECT 1000, 'mock-session-10', CURRENT_DATE - INTERVAL '2 day', 5, true, (SELECT player_id FROM players ORDER BY RANDOM() LIMIT 1)
-WHERE NOT EXISTS (SELECT 1 FROM game_results WHERE user_id = 1000 AND date = CURRENT_DATE - INTERVAL '2 day');
-
-INSERT INTO game_results (user_id, session_id, date, attempts_used, solved, target_player_id) 
-SELECT 1000, 'mock-session-11', CURRENT_DATE, 8, false, (SELECT player_id FROM players ORDER BY RANDOM() LIMIT 1)
-WHERE NOT EXISTS (SELECT 1 FROM game_results WHERE user_id = 1000 AND date = CURRENT_DATE);
-
--- FutbolMaster - second place
-INSERT INTO game_results (user_id, session_id, date, attempts_used, solved, target_player_id) 
-SELECT 1001, 'mock-session-20', CURRENT_DATE - INTERVAL '3 day', 3, true, (SELECT player_id FROM players ORDER BY RANDOM() LIMIT 1)
-WHERE NOT EXISTS (SELECT 1 FROM game_results WHERE user_id = 1001 AND date = CURRENT_DATE - INTERVAL '3 day');
-
-INSERT INTO game_results (user_id, session_id, date, attempts_used, solved, target_player_id) 
-SELECT 1001, 'mock-session-21', CURRENT_DATE - INTERVAL '2 day', 4, true, (SELECT player_id FROM players ORDER BY RANDOM() LIMIT 1)
-WHERE NOT EXISTS (SELECT 1 FROM game_results WHERE user_id = 1001 AND date = CURRENT_DATE - INTERVAL '2 day');
-
-INSERT INTO game_results (user_id, session_id, date, attempts_used, solved, target_player_id) 
-SELECT 1001, 'mock-session-22', CURRENT_DATE - INTERVAL '1 day', 2, true, (SELECT player_id FROM players ORDER BY RANDOM() LIMIT 1)
-WHERE NOT EXISTS (SELECT 1 FROM game_results WHERE user_id = 1001 AND date = CURRENT_DATE - INTERVAL '1 day');
-
-INSERT INTO game_results (user_id, session_id, date, attempts_used, solved, target_player_id) 
-SELECT 1001, 'mock-session-23', CURRENT_DATE, 3, true, (SELECT player_id FROM players ORDER BY RANDOM() LIMIT 1)
-WHERE NOT EXISTS (SELECT 1 FROM game_results WHERE user_id = 1001 AND date = CURRENT_DATE);
-
--- Striker99
-INSERT INTO game_results (user_id, session_id, date, attempts_used, solved, target_player_id) 
-SELECT 1002, 'mock-session-30', CURRENT_DATE - INTERVAL '1 day', 6, true, (SELECT player_id FROM players ORDER BY RANDOM() LIMIT 1)
-WHERE NOT EXISTS (SELECT 1 FROM game_results WHERE user_id = 1002 AND date = CURRENT_DATE - INTERVAL '1 day');
-
-INSERT INTO game_results (user_id, session_id, date, attempts_used, solved, target_player_id) 
-SELECT 1002, 'mock-session-31', CURRENT_DATE, 4, true, (SELECT player_id FROM players ORDER BY RANDOM() LIMIT 1)
-WHERE NOT EXISTS (SELECT 1 FROM game_results WHERE user_id = 1002 AND date = CURRENT_DATE);
-
--- GoalKeeper - only loss
-INSERT INTO game_results (user_id, session_id, date, attempts_used, solved, target_player_id) 
-SELECT 1003, 'mock-session-40', CURRENT_DATE, 8, false, (SELECT player_id FROM players ORDER BY RANDOM() LIMIT 1)
-WHERE NOT EXISTS (SELECT 1 FROM game_results WHERE user_id = 1003 AND date = CURRENT_DATE);
-
--- Calculate and store streak for each user
-ALTER TABLE users ADD COLUMN IF NOT EXISTS streak INT DEFAULT 0;
-
--- MistrzPiłki: 8-day streak
-UPDATE users SET streak = 8 WHERE id = 999;
-
--- FutbolMaster: 4-day streak  
-UPDATE users SET streak = 4 WHERE id = 1001;
-
--- Striker99: 2-day streak
-UPDATE users SET streak = 2 WHERE id = 1002;
-
--- Kibic123: 0 (lost today, only 1 previous win)
-UPDATE users SET streak = 0 WHERE id = 1000;
-
--- GoalKeeper: 0 (never won)
-UPDATE users SET streak = 0 WHERE id = 1003;
