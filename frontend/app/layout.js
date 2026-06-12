@@ -1,4 +1,5 @@
 import Navbar from './components/Navbar';
+import { AuthProvider } from './components/AuthContext';
 import './components/GuessThePlayer/styles.css';
 
 export const metadata = {
@@ -10,8 +11,10 @@ export default function RootLayout({ children }) {
 	return (
 		<html lang="pl">
 			<body>
-				<Navbar />
-				<main className="site-main">{children}</main>
+				<AuthProvider>
+					<Navbar />
+					<main className="site-main">{children}</main>
+				</AuthProvider>
 			</body>
 		</html>
 	);

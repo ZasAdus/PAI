@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import LoadingSpinner from './LoadingSpinner';
 import { fetchJson } from '../../../api/api';
 
-export default function PlayerSearch({ onSelect, disabled = false }) {
+export default function PlayerSearch({ onSelect, disabled = false, excludeIds = [] }) {
 	const [query, setQuery] = useState('');
 	const [items, setItems] = useState([]);
 	const [loading, setLoading] = useState(false);
@@ -23,6 +23,11 @@ export default function PlayerSearch({ onSelect, disabled = false }) {
 	}, []);
 
 	const normalizedQuery = useMemo(() => query.trim(), [query]);
+	const excludeSet = useMemo(() => new Set(excludeIds.map((value) => String(value))), [excludeIds]);
+	const visibleItems = useMemo(
+		() => items.filter((item) => !excludeSet.has(String(item.player_id))),
+		[items, excludeSet],
+	);
 
 	useEffect(() => {
 		if (disabled) {
@@ -82,11 +87,11 @@ export default function PlayerSearch({ onSelect, disabled = false }) {
 				<div className="search-dropdown" role="listbox" aria-label="Sugestie zawodników">
 					{loading ? <LoadingSpinner label="Szukam zawodników..." size="sm" /> : null}
 					{!loading && error ? <div className="empty-state">{error}</div> : null}
-					{!loading && !error && items.length === 0 ? (
+					{!loading && !error && visibleItems.length === 0 ? (
 						<div className="empty-state">Brak wyników.</div>
 					) : null}
 					{!loading && !error
-						? items.map((item) => (
+						? visibleItems.map((item) => (
 								<button
 									key={item.player_id}
 									type="button"

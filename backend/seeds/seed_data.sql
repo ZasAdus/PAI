@@ -1,8 +1,8 @@
 -- Mock data for leaderboard (password for all: "haslo123")
 -- Bcrypt hash of "haslo123": $2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/X4.FOGFhcJjv.QhKq
-INSERT INTO users (id, username, hashed_password) VALUES (999, 'MistrzPiłki', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/X4.FOGFhcJjv.QhKq') ON CONFLICT (id) DO NOTHING;
+INSERT INTO users (id, username, hashed_password) VALUES (999, 'PolskiPiłkarzKamil', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/X4.FOGFhcJjv.QhKq') ON CONFLICT (id) DO NOTHING;
 INSERT INTO users (id, username, hashed_password) VALUES (1000, 'Kibic123', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/X4.FOGFhcJjv.QhKq') ON CONFLICT (id) DO NOTHING;
-INSERT INTO users (id, username, hashed_password) VALUES (1001, 'FutbolMaster', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/X4.FOGFhcJjv.QhKq') ON CONFLICT (id) DO NOTHING;
+INSERT INTO users (id, username, hashed_password) VALUES (1001, 'JohnPork', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/X4.FOGFhcJjv.QhKq') ON CONFLICT (id) DO NOTHING;
 INSERT INTO users (id, username, hashed_password) VALUES (1002, 'Striker99', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/X4.FOGFhcJjv.QhKq') ON CONFLICT (id) DO NOTHING;
 INSERT INTO users (id, username, hashed_password) VALUES (1003, 'GoalKeeper', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/X4.FOGFhcJjv.QhKq') ON CONFLICT (id) DO NOTHING;
 

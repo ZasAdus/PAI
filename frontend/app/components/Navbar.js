@@ -1,26 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
-import { getAuthToken, clearAuthToken, fetchJson } from '../../api/api';
+import { useAuth } from './AuthContext';
 
 export default function Navbar() {
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    const token = getAuthToken();
-    if (token) {
-      fetchJson('/auth/me')
-        .then(data => setUser(data))
-        .catch(() => clearAuthToken());
-    }
-  }, []);
-
-  const handleLogout = () => {
-    clearAuthToken();
-    setUser(null);
-    window.location.reload();
-  };
+  const { user, isLoggedIn, logout } = useAuth();
 
   return (
     <nav className="navbar">
@@ -28,10 +12,10 @@ export default function Navbar() {
         <Link href="/" className="nav-logo">⚽ GuessThePlayer</Link>
         <div className="nav-links">
           <Link href="/leaderboard" className="nav-btn">Ranking</Link>
-          {user ? (
+          {isLoggedIn ? (
             <div className="nav-user">
               <span className="username">{user.username}</span>
-              <button onClick={handleLogout} className="btn-logout">Wyloguj</button>
+              <button onClick={logout} className="btn-logout">Wyloguj</button>
             </div>
           ) : (
             <>

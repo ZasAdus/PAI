@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 
-export default function GameOutcomeBanner({ state }) {
+export default function GameOutcomeBanner({ state, isLoggedIn }) {
 	const [visible, setVisible] = useState(false);
 	const [animationClass, setAnimationClass] = useState('');
 
@@ -42,6 +43,12 @@ export default function GameOutcomeBanner({ state }) {
 								'.'
 							)}
 						</span>
+						{!isLoggedIn && (
+							<span className="guest-prompt">
+								Zaloguj się, aby Twój wynik był w rankingu!{' '}
+								<Link href="/auth/register" className="inline-link">Zarejestruj się</Link>
+							</span>
+						)}
 					</div>
 				</div>
 				<div className="confetti">
@@ -73,6 +80,12 @@ export default function GameOutcomeBanner({ state }) {
 						)}
 						.
 					</span>
+					{!isLoggedIn && (
+						<span className="guest-prompt">
+							Dołącz do rankingu!{' '}
+							<Link href="/auth/register" className="inline-link">Zarejestruj się za darmo</Link>
+						</span>
+					)}
 				</div>
 			</div>
 			<div className="tears">

@@ -1,11 +1,13 @@
 ﻿"use client";
 
 import { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import PlayerSearch from './PlayerSearch';
 import GuessCard from './GuessCard';
 import GameOutcomeBanner from './GameOutcomeBanner';
 import LoadingSpinner from './LoadingSpinner';
 import DailyStats from './DailyStats';
+import { useAuth } from '../AuthContext';
 import { fetchJson } from '../../../api/api';
 import './styles.css';
 
@@ -26,6 +28,7 @@ function createSessionId() {
 }
 
 export default function GameBoard() {
+	const { isLoggedIn, loading: authLoading } = useAuth();
 	const [sessionId, setSessionId] = useState('');
 	const [state, setState] = useState(null);
 	const [guesses, setGuesses] = useState([]);
@@ -94,7 +97,7 @@ export default function GameBoard() {
 	const attemptsLeft = useMemo(() => state?.remaining_attempts ?? 8, [state]);
 	const gameLocked = Boolean(state?.game_over);
 
-	if (booting) {
+	if (booting || authLoading) {
 		return (
 			<section className="board">
 				<LoadingSpinner label="Przygotowuję dzienne wyzwanie..." />
@@ -104,11 +107,22 @@ export default function GameBoard() {
 
 	return (
 		<section className="board">
-			<GameOutcomeBanner state={state} />
+			{!isLoggedIn && (
+				<div className="guest-notice">
+					<span>🔒 Zaloguj się, aby zapisać swój wynik w rankingu!</span>
+					<Link href="/auth/register" className="guest-notice-btn">Zarejestruj się za darmo</Link>
+				</div>
+			)}
+
+			<GameOutcomeBanner state={state} isLoggedIn={isLoggedIn} />
 
 			<div className="panel">
 				<div className="panel-inner">
-					<PlayerSearch onSelect={handleSelect} disabled={busy || gameLocked} />
+					<PlayerSearch
+						onSelect={handleSelect}
+						disabled={busy || gameLocked}
+						excludeIds={guesses.map((guess) => String(guess.guess?.player_id ?? guess.player_id ?? ''))}
+					/>
 					<div className="status-row">
 						<span className="badge">Pozostałe próby: {attemptsLeft}</span>
 						{busy ? (
@@ -134,7 +148,7 @@ export default function GameBoard() {
 				)}
 			</div>
 
-			{gameLocked && <DailyStats />}
+			{gameLocked && <DailyStats isLoggedIn={isLoggedIn} />}
 		</section>
 	);
 }

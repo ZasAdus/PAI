@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { fetchJson } from '../../../api/api';
 
-export default function DailyStats() {
+export default function DailyStats({ isLoggedIn }) {
   const [stats, setStats] = useState(null);
 
   useEffect(() => {
@@ -17,7 +18,17 @@ export default function DailyStats() {
   return (
     <div className="stats-box">
       <h3>Statystyki dzisiejszego zawodnika</h3>
-      <p className="stats-total">Liczba gier dzisiaj: <strong>{stats.total_games}</strong></p>
+      <p className="stats-total">
+        {stats.total_games} {stats.total_games === 1 ? 'gra' : 'gier'} dzisiaj
+        {!isLoggedIn && (
+          <span className="stats-guest">
+            {' · '}
+            <Link href="/auth/register" className="inline-link">
+              Dołącz do {stats.total_games + 10}+ graczy w rankingu!
+            </Link>
+          </span>
+        )}
+      </p>
       
       <div className="stats-grid">
         {Object.entries(stats.distribution).sort((a,b) => {
@@ -51,6 +62,11 @@ export default function DailyStats() {
           font-size: 0.85rem;
           color: var(--text-muted);
           margin-bottom: 16px;
+        }
+        .stats-guest {
+          display: block;
+          margin-top: 8px;
+          color: var(--text-muted);
         }
         .stats-grid {
           display: flex;

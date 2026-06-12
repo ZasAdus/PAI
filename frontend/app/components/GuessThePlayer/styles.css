@@ -43,6 +43,58 @@ a {
   padding: 0 16px 48px;
 }
 
+/* ---------- Guest Notice ---------- */
+.guest-notice {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 20px;
+  margin-top: 20px;
+  background: linear-gradient(135deg, rgba(240, 192, 64, 0.15), rgba(240, 192, 64, 0.05));
+  border: 1px solid rgba(240, 192, 64, 0.3);
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  color: var(--text);
+}
+
+.guest-notice-btn {
+  padding: 8px 16px;
+  background: var(--accent);
+  color: var(--bg) !important;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 0.2s;
+}
+
+.guest-notice-btn:hover {
+  background: #e0b030;
+  transform: translateY(-1px);
+}
+
+/* ---------- Inline Link ---------- */
+.inline-link {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.inline-link:hover {
+  color: #e0b030;
+}
+
+/* ---------- Guest Prompt in Banners ---------- */
+.guest-prompt {
+  display: block;
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
 .game-page {
   max-width: 740px;
   margin: 0 auto;
