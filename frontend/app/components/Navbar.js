@@ -11,6 +11,8 @@ export default function Navbar() {
       <div className="navbar-inner">
         <Link href="/" className="nav-logo">⚽ GuessThePlayer</Link>
         <div className="nav-links">
+          <Link href="/guess-the-player" className="nav-btn">Zawodnik</Link>
+          <Link href="/guess-the-club" className="nav-btn">Klub</Link>
           <Link href="/leaderboard" className="nav-btn">Ranking</Link>
           {isLoggedIn ? (
             <div className="nav-user">

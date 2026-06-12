@@ -21,9 +21,11 @@ class GameResult(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     session_id = Column(String, index=True, nullable=True)
     date = Column(Date, default=date.today, index=True)
+    game_type = Column(String, default="player", nullable=False, index=True)
     attempts_used = Column(Integer, nullable=False)
     solved = Column(Boolean, default=False)
     target_player_id = Column(BigInteger, ForeignKey("players.player_id"))
+    target_club_id = Column(Text, nullable=True)
 
     user = relationship("User", back_populates="game_results")
     target_player = relationship("Player")

@@ -4,20 +4,20 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { fetchJson } from '../../../api/api';
 
-export default function DailyStats({ isLoggedIn }) {
+export default function DailyStats({ isLoggedIn, gameType = 'player', title }) {
   const [stats, setStats] = useState(null);
 
   useEffect(() => {
-    fetchJson('/stats/daily')
+    fetchJson(`/stats/daily?game_type=${encodeURIComponent(gameType)}`)
       .then(data => setStats(data))
       .catch(err => console.error('Stats error:', err));
-  }, []);
+  }, [gameType]);
 
   if (!stats || stats.total_games === 0) return null;
 
   return (
     <div className="stats-box">
-      <h3>Statystyki dzisiejszego zawodnika</h3>
+      <h3>{title || (gameType === 'club' ? 'Statystyki dzisiejszego klubu' : 'Statystyki dzisiejszego zawodnika')}</h3>
       <p className="stats-total">
         {stats.total_games} {stats.total_games === 1 ? 'gra' : 'gier'} dzisiaj
         {!isLoggedIn && (

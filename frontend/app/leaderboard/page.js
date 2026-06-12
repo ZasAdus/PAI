@@ -6,12 +6,14 @@ import { fetchJson } from '../../api/api';
 export default function LeaderboardPage() {
   const [leaders, setLeaders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState('all');
 
   useEffect(() => {
-    fetchJson('/leaderboard')
+    setLoading(true);
+    fetchJson(`/leaderboard?game_type=${encodeURIComponent(filter)}`)
       .then(data => setLeaders(data))
       .finally(() => setLoading(false));
-  }, []);
+  }, [filter]);
 
   return (
     <div className="game-page">
@@ -20,6 +22,18 @@ export default function LeaderboardPage() {
           <div className="game-page-head">
             <span className="eyebrow">Najlepsi gracze</span>
             <h1>Ranking</h1>
+          </div>
+
+          <div className="leaderboard-filters">
+            <button type="button" className={filter === 'all' ? 'filter-btn active' : 'filter-btn'} onClick={() => setFilter('all')}>
+              Wszystkie gry
+            </button>
+            <button type="button" className={filter === 'player' ? 'filter-btn active' : 'filter-btn'} onClick={() => setFilter('player')}>
+              Zawodnik
+            </button>
+            <button type="button" className={filter === 'club' ? 'filter-btn active' : 'filter-btn'} onClick={() => setFilter('club')}>
+              Klub
+            </button>
           </div>
 
           {loading ? (
@@ -73,6 +87,26 @@ export default function LeaderboardPage() {
           width: 100%;
           border-collapse: collapse;
           margin-top: 20px;
+        }
+        .leaderboard-filters {
+          display: flex;
+          gap: 10px;
+          flex-wrap: wrap;
+          margin-top: 18px;
+        }
+        .filter-btn {
+          padding: 8px 14px;
+          border-radius: 999px;
+          border: 1px solid var(--border);
+          background: transparent;
+          color: var(--text-muted);
+          font-weight: 700;
+          cursor: pointer;
+        }
+        .filter-btn.active {
+          color: var(--bg);
+          background: var(--accent);
+          border-color: var(--accent);
         }
         .leaderboard-table th {
           text-align: left;

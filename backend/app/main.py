@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
 
-from .schemas import HealthResponse
+from .schemas import ClubGuessRequest, GuessRequest, HealthResponse
 from . import services, auth, database
 
 app = FastAPI(title="GuessThePlayer API")
@@ -87,6 +87,17 @@ def read_users_me(current_user: dict = Depends(auth.get_current_user)):
 
 # ---------- Players ----------
 
+def _resolve_user_id(token: str | None) -> int | None:
+    user_id = None
+    if token:
+        try:
+            current_user = auth.get_current_user(token)
+            user_id = current_user["id"]
+        except HTTPException:
+            pass
+    return user_id
+
+
 @app.get("/api/players/search")
 def search_players(
     q: str = Query(..., min_length=1),
@@ -96,37 +107,27 @@ def search_players(
     return {"items": [p.dict() for p in items]}
 
 
+@app.get("/api/clubs/search")
+def search_clubs(
+    q: str = Query(..., min_length=1),
+    limit: int = Query(10, ge=1, le=20),
+):
+    items = services.search_clubs(q, limit=limit)
+    return {"items": [club.dict() for club in items]}
+
+
 # ---------- Game ----------
-
-class GuessRequest(BaseModel):
-    session_id: str
-    player_id: int
-
 
 @app.post("/api/game/daily/start")
 def start_game(session_id: str = Query(...), token: str = Depends(auth.oauth2_scheme_optional)):
-    user_id = None
-    if token:
-        try:
-            current_user = auth.get_current_user(token)
-            user_id = current_user["id"]
-        except HTTPException:
-            pass
-
+    user_id = _resolve_user_id(token)
     state = services.start_daily_game(session_id, user_id=user_id)
     return state.dict()
 
 
 @app.post("/api/game/daily/guess")
 def guess(body: GuessRequest, token: str = Depends(auth.oauth2_scheme_optional)):
-    user_id = None
-    if token:
-        try:
-            current_user = auth.get_current_user(token)
-            user_id = current_user["id"]
-        except HTTPException:
-            pass
-
+    user_id = _resolve_user_id(token)
     try:
         state, attempt = services.apply_guess(body.session_id, body.player_id, user_id=user_id)
     except ValueError as exc:
@@ -134,10 +135,36 @@ def guess(body: GuessRequest, token: str = Depends(auth.oauth2_scheme_optional))
     message = services.describe_guess_result(state, attempt)
     return {"state": state.dict(), "message": message}
 
+
+@app.post("/api/game/club-daily/start")
+def start_club_game(session_id: str = Query(...), token: str = Depends(auth.oauth2_scheme_optional)):
+    user_id = _resolve_user_id(token)
+    state = services.start_daily_club_game(session_id, user_id=user_id)
+    return state.dict()
+
+
+@app.post("/api/game/club-daily/guess")
+def guess_club(body: ClubGuessRequest, token: str = Depends(auth.oauth2_scheme_optional)):
+    user_id = _resolve_user_id(token)
+    try:
+        state, attempt = services.apply_club_guess(body.session_id, body.club_id, user_id=user_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    message = services.describe_club_guess_result(state, attempt)
+    return {"state": state.dict(), "message": message}
+
+
 @app.get("/api/leaderboard")
-def get_leaderboard():
-    return services.get_leaderboard()
+def get_leaderboard(game_type: str = Query("all")):
+    normalized = game_type.strip().lower()
+    if normalized not in {"all", "player", "club"}:
+        raise HTTPException(status_code=400, detail="Invalid game type")
+    return services.get_leaderboard(normalized)
+
 
 @app.get("/api/stats/daily")
-def get_daily_stats():
-    return services.get_daily_stats()
+def get_daily_stats(game_type: str = Query("player")):
+    normalized = game_type.strip().lower()
+    if normalized not in {"player", "club"}:
+        raise HTTPException(status_code=400, detail="Invalid game type")
+    return services.get_daily_stats(normalized)
