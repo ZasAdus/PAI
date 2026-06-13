@@ -1,0 +1,191 @@
+.navbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  height: 60px;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+ 
+.navbar-inner {
+  max-width: 780px;
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+ 
+/* ----- Logo ----- */
+.nav-logo {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+ 
+.nav-logo-icon {
+  font-size: 18px;
+}
+ 
+/* ----- Game mode buttons ----- */
+.nav-center {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+ 
+.game-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 16px;
+  min-width: 130px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background 0.15s, border-color 0.15s;
+}
+ 
+.game-btn:hover {
+  background: var(--surface-2);
+  border-color: var(--border);
+}
+ 
+.btn-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+ 
+.btn-icon-player {
+  background: rgba(24, 95, 165, 0.15);
+}
+ 
+.btn-icon-club {
+  background: rgba(59, 109, 17, 0.15);
+}
+ 
+.btn-label {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+ 
+.btn-mode {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+ 
+.btn-label strong {
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+ 
+/* ----- Right side ----- */
+.nav-right {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+ 
+.nav-divider {
+  width: 1px;
+  height: 24px;
+  background: var(--border);
+  margin: 0 4px;
+}
+ 
+.nav-link {
+  padding: 7px 12px;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 400;
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition: all 0.15s;
+}
+ 
+.nav-link:hover {
+  background: var(--surface-2);
+  color: var(--text);
+  border-color: var(--border);
+}
+ 
+.btn-register {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 7px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.15s;
+}
+ 
+.btn-register:hover {
+  background: var(--surface-2);
+}
+ 
+/* ----- Logged in user ----- */
+.nav-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+ 
+.nav-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(24, 95, 165, 0.15);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+}
+ 
+.nav-username {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+}
+ 
+.btn-logout {
+  padding: 5px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+ 
+.btn-logout:hover {
+  border-color: var(--wrong);
+  color: var(--wrong);
+  background: rgba(224, 82, 82, 0.1);
+}
