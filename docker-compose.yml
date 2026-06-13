@@ -14,7 +14,10 @@ services:
       retries: 5
     volumes:
       - db_data:/var/lib/postgresql/data
-      - ./backend/seeds:/docker-entrypoint-initdb.d:ro
+      - ./backend/seeds/seed_data.sql:/docker-entrypoint-initdb.d/seed_data.sql:ro
+      - ./backend/seeds/player_profiles.csv:/docker-entrypoint-initdb.d/player_profiles.csv:ro
+      - ./backend/seeds/team_competitions_seasons.csv:/docker-entrypoint-initdb.d/team_competitions_seasons.csv:ro
+      - ./backend/seeds/team_details.csv:/docker-entrypoint-initdb.d/team_details.csv:ro
     ports:
       - "5432:5432"
 

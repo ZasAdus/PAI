@@ -22,6 +22,7 @@ from .schemas import (
 )
 
 CURRENT_COMPETITIONS = ("ES1", "GB1", "L1", "FR1", "IT1")
+ACTIVE_SEASON = "2025"
 PLAYER_TARGET_CACHE_PREFIX = "gtp:daily-target"
 PLAYER_STATE_CACHE_PREFIX = "gtp:daily-state"
 PLAYER_SEARCH_CACHE_PREFIX = "gtp:search"
@@ -41,19 +42,61 @@ COUNTRY_ALIASES = {
     "curacao": "Curacao",
     "czech republic": "Czechia",
     "dr congo": "Democratic Republic of the Congo",
-    "england": "England",
     "iran": "Iran",
     "ivory coast": "Cote d'Ivoire",
-    "kosovo": "Kosovo",
     "north macedonia": "North Macedonia",
     "republic of ireland": "Ireland",
     "russia": "Russia",
-    "scotland": "Scotland",
     "south korea": "South Korea",
     "syria": "Syria",
     "usa": "United States",
     "united states": "United States",
-    "wales": "Wales",
+}
+
+# Kraje nierozpoznawane przez restcountries.com — flagi podane bezpośrednio
+HARDCODED_FLAG_URLS: dict[str, str] = {
+    "england": "https://upload.wikimedia.org/wikipedia/en/b/be/Flag_of_England.svg",
+    "scotland": "https://upload.wikimedia.org/wikipedia/commons/1/10/Flag_of_Scotland.svg",
+    "wales": "https://upload.wikimedia.org/wikipedia/commons/d/dc/Flag_of_Wales.svg",
+    "northern ireland": "https://upload.wikimedia.org/wikipedia/commons/f/f6/Flag_of_Northern_Ireland_%281953%E2%80%931972%29.svg",
+    "kosovo": "https://upload.wikimedia.org/wikipedia/commons/1/1f/Flag_of_Kosovo.svg",
+}
+
+COUNTRY_ISO_CODES: dict[str, str] = {
+    "afghanistan": "af", "albania": "al", "algeria": "dz", "andorra": "ad",
+    "angola": "ao", "argentina": "ar", "armenia": "am", "australia": "au",
+    "austria": "at", "azerbaijan": "az", "bahrain": "bh", "belarus": "by",
+    "belgium": "be", "benin": "bj", "bolivia": "bo", "bosnia and herzegovina": "ba",
+    "brazil": "br", "bulgaria": "bg", "burkina faso": "bf", "cameroon": "cm",
+    "canada": "ca", "cabo verde": "cv", "chile": "cl", "china": "cn",
+    "colombia": "co", "congo": "cg", "costa rica": "cr", "croatia": "hr",
+    "cuba": "cu", "curacao": "cw", "czechia": "cz", "czech republic": "cz",
+    "democratic republic of the congo": "cd", "denmark": "dk", "dr congo": "cd",
+    "ecuador": "ec", "egypt": "eg", "ethiopia": "et", "finland": "fi",
+    "france": "fr", "gabon": "ga", "gambia": "gm", "georgia": "ge",
+    "germany": "de", "ghana": "gh", "greece": "gr", "guatemala": "gt",
+    "guinea": "gn", "guinea-bissau": "gw", "honduras": "hn", "hungary": "hu",
+    "iceland": "is", "india": "in", "indonesia": "id", "iran": "ir",
+    "iraq": "iq", "ireland": "ie", "republic of ireland": "ie", "israel": "il",
+    "italy": "it", "ivory coast": "ci", "jamaica": "jm", "japan": "jp",
+    "jordan": "jo", "kazakhstan": "kz", "kenya": "ke", "latvia": "lv",
+    "lebanon": "lb", "liberia": "lr", "libya": "ly", "liechtenstein": "li",
+    "lithuania": "lt", "luxembourg": "lu", "madagascar": "mg", "mali": "ml",
+    "malta": "mt", "mauritania": "mr", "mauritius": "mu", "mexico": "mx",
+    "moldova": "md", "monaco": "mc", "montenegro": "me", "morocco": "ma",
+    "mozambique": "mz", "namibia": "na", "netherlands": "nl", "new zealand": "nz",
+    "nicaragua": "ni", "niger": "ne", "nigeria": "ng", "north korea": "kp",
+    "north macedonia": "mk", "norway": "no", "oman": "om", "panama": "pa",
+    "paraguay": "py", "peru": "pe", "philippines": "ph", "poland": "pl",
+    "portugal": "pt", "qatar": "qa", "romania": "ro", "russia": "ru",
+    "saudi arabia": "sa", "senegal": "sn", "serbia": "rs", "sierra leone": "sl",
+    "slovakia": "sk", "slovenia": "si", "south africa": "za", "south korea": "kr",
+    "spain": "es", "sudan": "sd", "sweden": "se", "switzerland": "ch",
+    "syria": "sy", "tanzania": "tz", "thailand": "th", "togo": "tg",
+    "trinidad and tobago": "tt", "tunisia": "tn", "turkey": "tr", "turkiye": "tr",
+    "uganda": "ug", "ukraine": "ua", "united arab emirates": "ae",
+    "united states": "us", "usa": "us", "uruguay": "uy", "uzbekistan": "uz",
+    "venezuela": "ve", "vietnam": "vn", "zambia": "zm", "zimbabwe": "zw",
 }
 
 
@@ -150,7 +193,8 @@ def _club_summary_from_row(row: dict) -> ClubSummary:
 
 
 def _player_query_clause() -> str:
-    return """
+    competitions = ", ".join(f"'{value}'" for value in CURRENT_COMPETITIONS)
+    return f"""
         SELECT
             p.player_id,
             p.player_slug,
@@ -169,20 +213,25 @@ def _player_query_clause() -> str:
             COALESCE(comp.competition_name, c.competition_name) AS competition_name,
             comp.season_rank AS competition_rank
         FROM players p
-        LEFT JOIN clubs c
-            ON c.club_id = p.current_club_id
-           AND c.season_id = '2025'
-           AND c.competition_id IN ('ES1', 'GB1', 'L1', 'FR1', 'IT1')
+        LEFT JOIN LATERAL (
+            SELECT club.country_name, club.competition_name
+            FROM clubs club
+            WHERE club.club_id = p.current_club_id
+              AND club.competition_id IN ({competitions})
+            ORDER BY club.season_id DESC
+            LIMIT 1
+        ) c ON true
         LEFT JOIN competitions comp
             ON comp.club_id = p.current_club_id
-           AND comp.season_id = '2025'
-           AND comp.competition_id IN ('ES1', 'GB1', 'L1', 'FR1', 'IT1')
+           AND comp.season_id = '{ACTIVE_SEASON}'
+           AND comp.competition_id IN ({competitions})
     """
 
 
-def _club_query_clause() -> str:
-    return """
-        SELECT DISTINCT
+def _club_catalog_subquery() -> str:
+    competitions = ", ".join(f"'{value}'" for value in CURRENT_COMPETITIONS)
+    return f"""
+        SELECT DISTINCT ON (c.club_id)
             c.club_id,
             c.club_name,
             c.logo_url,
@@ -190,9 +239,15 @@ def _club_query_clause() -> str:
             c.competition_id,
             c.competition_name
         FROM clubs c
-        WHERE c.season_id = '2025'
-          AND c.competition_id IN ('ES1', 'GB1', 'L1', 'FR1', 'IT1')
+        WHERE c.club_id IN (
+            SELECT comp.club_id
+            FROM competitions comp
+            WHERE comp.season_id = '{ACTIVE_SEASON}'
+              AND comp.competition_id IN ({competitions})
+        )
+          AND c.competition_id IN ({competitions})
           AND c.club_name IS NOT NULL
+        ORDER BY c.club_id, c.season_id DESC
     """
 
 
@@ -237,8 +292,9 @@ def get_club(club_id: str) -> ClubSummary | None:
 
     row = fetch_one(
         f"""
-        {_club_query_clause()}
-          AND c.club_id = :club_id
+        SELECT *
+        FROM ({_club_catalog_subquery()}) c
+        WHERE c.club_id = :club_id
         LIMIT 1
     """,
         {"club_id": club_id},
@@ -312,11 +368,12 @@ def search_clubs(query: str, limit: int = 10) -> list[ClubSummary]:
     contains_query = f"%{normalized}%"
     rows = fetch_all(
         f"""
-            {_club_query_clause()}
-              AND (
+            SELECT *
+            FROM ({_club_catalog_subquery()}) c
+            WHERE (
                 LOWER(c.club_name) LIKE LOWER(:like_query)
                 OR LOWER(c.club_name) LIKE LOWER(:contains_query)
-              )
+            )
             ORDER BY
                 CASE
                     WHEN LOWER(c.club_name) = LOWER(:exact_query) THEN 0
@@ -391,31 +448,19 @@ def _primary_country_for_player(player: PlayerSummary) -> str | None:
         return birth_values[0]
     return None
 
-
 def get_country_flag_url(country_name: str | None) -> str | None:
     if not country_name:
         return None
 
     normalized = _normalize_text(country_name)
-    cache_key = f"{FLAG_CACHE_PREFIX}:{normalized}"
-    cached = cache_get_json(cache_key)
-    if cached and "flag_url" in cached:
-        return cached["flag_url"]
 
-    query_name = COUNTRY_ALIASES.get(normalized, country_name.strip())
-    url = f"https://restcountries.com/v3.1/name/{quote(query_name)}?fields=name,flags,cca2"
-    try:
-        response = httpx.get(url, timeout=10.0)
-        response.raise_for_status()
-        payload = response.json()
-        if isinstance(payload, list) and payload:
-            item = payload[0]
-            flag_url = (item.get("flags") or {}).get("svg") or (item.get("flags") or {}).get("png")
-            if flag_url:
-                cache_set_json(cache_key, {"flag_url": flag_url}, ttl_seconds=86400 * 30)
-                return flag_url
-    except Exception:
-        pass
+    if normalized in HARDCODED_FLAG_URLS:
+        return HARDCODED_FLAG_URLS[normalized]
+
+    iso = COUNTRY_ISO_CODES.get(normalized)
+    if iso:
+        return f"https://flagcdn.com/w80/{iso}.png"
+
     return None
 
 
@@ -484,28 +529,35 @@ def _get_eligible_club_ids() -> list[str]:
         return [str(value) for value in cached["club_ids"]]
 
     rows = fetch_all(
-        """
+        f"""
         SELECT
-            p.current_club_id AS club_id
-        FROM players p
-        JOIN clubs c
-            ON c.club_id = p.current_club_id
-           AND c.season_id = '2025'
-           AND c.competition_id IN ('ES1', 'GB1', 'L1', 'FR1', 'IT1')
-        WHERE p.current_club_id IS NOT NULL
-          AND p.current_club_name NOT IN ('Retired', 'Without Club')
-        GROUP BY p.current_club_id
-        HAVING SUM(CASE WHEN LOWER(COALESCE(p.main_position, p.position, '')) LIKE '%goalkeeper%' THEN 1 ELSE 0 END) >= 1
-           AND SUM(CASE WHEN LOWER(COALESCE(p.main_position, p.position, '')) LIKE '%defender%' THEN 1 ELSE 0 END) >= 4
-           AND SUM(CASE WHEN LOWER(COALESCE(p.main_position, p.position, '')) LIKE '%midfield%' THEN 1 ELSE 0 END) >= 4
-           AND SUM(CASE
-                WHEN LOWER(COALESCE(p.main_position, p.position, '')) LIKE '%attack%'
-                  OR LOWER(COALESCE(p.main_position, p.position, '')) LIKE '%forward%'
-                  OR LOWER(COALESCE(p.main_position, p.position, '')) LIKE '%striker%'
-                THEN 1
-                ELSE 0
-           END) >= 2
-        ORDER BY p.current_club_id ASC
+            roster.club_id
+        FROM (
+            SELECT
+                p.current_club_id AS club_id,
+                CASE
+                    WHEN LOWER(COALESCE(p.main_position, p.position, '')) LIKE '%goalkeeper%' THEN 'goalkeeper'
+                    WHEN LOWER(COALESCE(p.main_position, p.position, '')) LIKE '%defender%' THEN 'defender'
+                    WHEN LOWER(COALESCE(p.main_position, p.position, '')) LIKE '%midfield%' THEN 'midfielder'
+                    WHEN LOWER(COALESCE(p.main_position, p.position, '')) LIKE '%attack%'
+                      OR LOWER(COALESCE(p.main_position, p.position, '')) LIKE '%forward%'
+                      OR LOWER(COALESCE(p.main_position, p.position, '')) LIKE '%striker%' THEN 'attacker'
+                    ELSE NULL
+                END AS line
+            FROM players p
+            JOIN competitions comp
+                ON comp.club_id = p.current_club_id
+               AND comp.season_id = '{ACTIVE_SEASON}'
+               AND comp.competition_id IN ({", ".join(f"'{value}'" for value in CURRENT_COMPETITIONS)})
+            WHERE p.current_club_id IS NOT NULL
+              AND p.current_club_name NOT IN ('Retired', 'Without Club')
+        ) roster
+        GROUP BY roster.club_id
+        HAVING SUM(CASE WHEN roster.line = 'goalkeeper' THEN 1 ELSE 0 END) >= 1
+           AND SUM(CASE WHEN roster.line = 'defender' THEN 1 ELSE 0 END) >= 4
+           AND SUM(CASE WHEN roster.line = 'midfielder' THEN 1 ELSE 0 END) >= 4
+           AND SUM(CASE WHEN roster.line = 'attacker' THEN 1 ELSE 0 END) >= 2
+        ORDER BY roster.club_id ASC
         """
     )
     club_ids = [str(row["club_id"]) for row in rows]
@@ -525,9 +577,17 @@ def get_daily_club_target_id() -> str:
         raise RuntimeError("No eligible clubs available")
 
     digest = hashlib.sha256(f"club:{today}".encode("utf-8")).hexdigest()
-    club_id = club_ids[int(digest, 16) % len(club_ids)]
-    cache_set_json(cache_key, {"club_id": club_id}, ttl_seconds=seconds_until_tomorrow())
-    return club_id
+    start_index = int(digest, 16) % len(club_ids)
+    for offset in range(len(club_ids)):
+        club_id = club_ids[(start_index + offset) % len(club_ids)]
+        try:
+            build_daily_club_lineup(club_id)
+        except RuntimeError:
+            continue
+        cache_set_json(cache_key, {"club_id": club_id}, ttl_seconds=seconds_until_tomorrow())
+        return club_id
+
+    raise RuntimeError("No eligible clubs available")
 
 
 def _players_for_club(club_id: str) -> list[PlayerSummary]:
@@ -543,10 +603,25 @@ def _players_for_club(club_id: str) -> list[PlayerSummary]:
     return [_player_summary_from_row(row) for row in rows]
 
 
-def _sort_players_by_market_value(players: list[PlayerSummary]) -> list[tuple[PlayerSummary, int]]:
+def _get_cached_market_value(player: PlayerSummary) -> int | None:
+    cache_key = f"{MARKET_VALUE_CACHE_PREFIX}:{player.player_id}"
+    cached = cache_get_json(cache_key)
+    if cached and "value" in cached and cached["value"] is not None:
+        return int(cached["value"])
+    return None
+
+
+def _sort_players_by_market_value(
+    players: list[PlayerSummary],
+    *,
+    fetch_missing: bool = False,
+) -> list[tuple[PlayerSummary, int]]:
     ranked: list[tuple[PlayerSummary, int]] = []
     for player in players:
-        market_value = fetch_player_market_value(player) or 0
+        if fetch_missing:
+            market_value = fetch_player_market_value(player) or 0
+        else:
+            market_value = _get_cached_market_value(player) or 0
         ranked.append((player, market_value))
     ranked.sort(
         key=lambda item: (
@@ -962,11 +1037,13 @@ def describe_guess_result(state: DailyGameState, attempt: AttemptResult) -> str:
     if state.game_over and not attempt.is_correct:
         return f"Koniec gry! Szukany zawodnik to: {target_name}."
 
-    return f"Próba {attempt.attempt_number} zapisana. Pozostało prób: {state.remaining_attempts}."
+    return f""
 
 
 def describe_club_guess_result(state: ClubDailyGameState, attempt: ClubGuessAttempt) -> str:
     target_name = state.revealed_target.club_name if state.revealed_target else "nieznany klub"
+    if state.revealed_target:
+        target_name = re.sub(r"\s*\(\d+\)\s*$", "", target_name).strip()
 
     if attempt.is_correct:
         return f"Brawo! Odgadłeś klub: {target_name}."
@@ -974,7 +1051,7 @@ def describe_club_guess_result(state: ClubDailyGameState, attempt: ClubGuessAtte
     if state.game_over:
         return f"Koniec gry! Szukany klub to: {target_name}."
 
-    return f"Próba {attempt.attempt_number} zapisana. Pozostało prób: {state.remaining_attempts}."
+    return f""
 
 
 def get_leaderboard(game_type: str = "all"):

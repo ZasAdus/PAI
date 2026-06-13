@@ -140,7 +140,10 @@ def guess(body: GuessRequest, token: str = Depends(auth.oauth2_scheme_optional))
 @app.post("/api/game/club-daily/start")
 def start_club_game(session_id: str = Query(...), token: str = Depends(auth.oauth2_scheme_optional)):
     user_id = _resolve_user_id(token)
-    state = services.start_daily_club_game(session_id, user_id=user_id)
+    try:
+        state = services.start_daily_club_game(session_id, user_id=user_id)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc))
     return state.dict()
 
 
