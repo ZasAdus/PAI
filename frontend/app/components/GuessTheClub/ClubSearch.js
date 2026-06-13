@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import LoadingSpinner from '../GuessThePlayer/LoadingSpinner';
+import LoadingSpinner from '../LoadingSpinner';
 import { fetchJson } from '../../../api/api';
 
 export default function ClubSearch({ onSelect, disabled = false, excludeIds = [] }) {
@@ -18,7 +18,6 @@ export default function ClubSearch({ onSelect, disabled = false, excludeIds = []
 				setOpen(false);
 			}
 		}
-
 		document.addEventListener('mousedown', handleClickOutside);
 		return () => document.removeEventListener('mousedown', handleClickOutside);
 	}, []);
@@ -31,9 +30,7 @@ export default function ClubSearch({ onSelect, disabled = false, excludeIds = []
 	);
 
 	useEffect(() => {
-		if (disabled) {
-			return undefined;
-		}
+		if (disabled) return undefined;
 
 		if (!normalizedQuery) {
 			setItems([]);
@@ -50,7 +47,7 @@ export default function ClubSearch({ onSelect, disabled = false, excludeIds = []
 				const response = await fetchJson(`/clubs/search?${params.toString()}`);
 				setItems(response.items || []);
 				setOpen(true);
-			} catch (requestError) {
+			} catch {
 				setError('Nie udało się pobrać podpowiedzi klubów.');
 				setItems([]);
 			} finally {
@@ -61,8 +58,14 @@ export default function ClubSearch({ onSelect, disabled = false, excludeIds = []
 		return () => window.clearTimeout(timeoutId);
 	}, [disabled, normalizedQuery]);
 
+	function cleanClubName(name) {
+		return name?.replace(/\s*\(\d+\)\s*$/, '').trim() ?? '';
+	}
+
 	function handleSelect(item) {
-		setQuery(item.club_name);
+		// Resetuj pole — identycznie jak PlayerSearch
+		setQuery('');
+		setItems([]);
 		setOpen(false);
 		onSelect?.(item);
 	}
@@ -97,14 +100,14 @@ export default function ClubSearch({ onSelect, disabled = false, excludeIds = []
 								>
 									<img className="avatar" src={item.logo_url || 'https://dummyimage.com/88x88/141a2d/ffffff&text=FC'} alt="" />
 									<span className="search-meta">
-										<span className="search-name">{item.club_name}</span>
+										<span className="search-name">{cleanClubName(item.club_name)}</span>
 										<span className="search-subtitle">
 											{item.competition_name || 'Brak ligi'}
 											{item.country_name ? ` · ${item.country_name}` : ''}
 										</span>
 									</span>
 								</button>
-							))
+						  ))
 						: null}
 				</div>
 			)}
