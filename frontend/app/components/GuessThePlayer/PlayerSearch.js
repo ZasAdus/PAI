@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import LoadingSpinner from './LoadingSpinner';
+import LoadingSpinner from '../LoadingSpinner';
 import { fetchJson } from '../../../api/api';
 
 export default function PlayerSearch({ onSelect, disabled = false, excludeIds = [] }) {
@@ -63,7 +63,7 @@ export default function PlayerSearch({ onSelect, disabled = false, excludeIds = 
 	}, [disabled, normalizedQuery]);
 
 	function handleSelect(item) {
-		setQuery(item.player_name);
+		setQuery('');    
 		setOpen(false);
 		onSelect?.(item);
 	}

@@ -5,8 +5,7 @@ export default function GamePage() {
 		<div className="game-page">
 			<section className="game-page-head">
 				<div className="eyebrow">Guess The Player</div>
-				<h1>Dzienne wyzwanie piłkarskie</h1>
-				<p>Odgadnij tajemniczego zawodnika z topowych lig europejskich na podstawie podpowiedzi.</p>
+				<h1>Odgadnij tajemniczego zawodnika grającego w jednej z 5 topowych lig europejskich</h1>
 			</section>
 			<GameBoard />
 		</div>

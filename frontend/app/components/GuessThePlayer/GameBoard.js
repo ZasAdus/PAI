@@ -5,8 +5,8 @@ import Link from 'next/link';
 import PlayerSearch from './PlayerSearch';
 import GuessCard from './GuessCard';
 import GameOutcomeBanner from './GameOutcomeBanner';
-import LoadingSpinner from './LoadingSpinner';
-import DailyStats from './DailyStats';
+import LoadingSpinner from '../LoadingSpinner';
+import DailyStats from '../DailyStats';
 import { useAuth } from '../AuthContext';
 import { fetchJson } from '../../../api/api';
 import './styles.css';
@@ -110,7 +110,7 @@ export default function GameBoard() {
 			{!isLoggedIn && (
 				<div className="guest-notice">
 					<span>🔒 Zaloguj się, aby zapisać swój wynik w rankingu!</span>
-					<Link href="/auth/register" className="guest-notice-btn">Zarejestruj się za darmo</Link>
+					<Link href="/auth/register" className="guest-notice-btn">Zarejestruj się</Link>
 				</div>
 			)}
 
