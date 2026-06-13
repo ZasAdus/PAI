@@ -1,4 +1,4 @@
-import Navbar from './components/Navbar';
+import Navbar from './components/Navbar/Navbar';
 import { AuthProvider } from './components/AuthContext';
 import './components/GuessThePlayer/styles.css';
 

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { fetchJson } from '../../../api/api';
+import { fetchJson } from '../../api/api';
 
 export default function DailyStats({ isLoggedIn, gameType = 'player', title }) {
   const [stats, setStats] = useState(null);
