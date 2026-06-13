@@ -54,10 +54,7 @@ export default function LeaderboardPage() {
                   <tr key={leader.username} className={index < 3 ? `top-${index + 1}` : ''}>
                     <td className="position">#{index + 1}</td>
                     <td>
-                      <strong>{leader.username}</strong>
-                      {leader.streak > 0 && (
-                        <span className="streak-badge">{leader.streak} dni</span>
-                      )}
+                      <strong>{leader.username}</strong>  
                     </td>
                     <td className="streak-cell">
                       {leader.streak > 0 ? (
