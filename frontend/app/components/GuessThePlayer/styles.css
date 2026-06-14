@@ -465,7 +465,11 @@ a {
   padding: 8px 10px;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  overflow: hidden;
+  text-align: center;
 }
 
 .hint-label {
@@ -482,18 +486,40 @@ a {
   gap: 4px;
   font-weight: 700;
   font-size: 0.85rem;
+  min-width: 0;
+  flex: 1;
 }
 
 .value-text {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  min-width: 0;
+  flex: 1;
 }
 
-.hint-value.correct { color: var(--correct); }
+.hint-value--icon {
+  justify-content: center;
+}
+
 .hint-value.higher { color: var(--hint-up); }
 .hint-value.lower { color: var(--hint-down); }
 .hint-value.different { color: var(--wrong); }
+
+/* Kolory tła całego hint-box */
+.hint-box:has(.hint-value.correct) {
+  background: rgba(62, 207, 110, 0.15);
+  border-color: rgba(62, 207, 110, 0.4);
+}
+.hint-box:has(.hint-value.higher),
+.hint-box:has(.hint-value.lower) {
+  background: rgba(240, 160, 64, 0.12);
+  border-color: rgba(240, 160, 64, 0.35);
+}
+.hint-box:has(.hint-value.different) {
+  background: rgba(224, 82, 82, 0.12);
+  border-color: rgba(224, 82, 82, 0.35);
+}
 
 .arrow { font-size: 1rem; line-height: 1; flex-shrink: 0; font-weight: 900; }
 
@@ -642,7 +668,64 @@ a {
   100% { transform: translateY(60px); opacity: 0; }
 }
 
-/* ---------- Lista prób ---------- */
+/* ---------- Ikony w hint-boxach ---------- */
+.hint-icon {
+  flex-shrink: 0;
+  object-fit: contain;
+  border-radius: 2px;
+}
+
+.hint-icon-flag {
+  width: 32px;
+  height: 22px;
+  border-radius: 3px;
+}
+
+.hint-icon-club {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.hint-icon-league {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+
+/* ---------- Ikony w wynikach wyszukiwania ---------- */
+.search-flag {
+  display: inline-block;
+  width: 18px;
+  height: 12px;
+  object-fit: cover;
+  border-radius: 2px;
+  margin-right: 5px;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.search-club-logo {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  margin-right: 4px;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.search-league-logo {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+  margin-right: 3px;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+
 .guesses {
   display: flex;
   flex-direction: column;

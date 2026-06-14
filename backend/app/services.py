@@ -865,11 +865,11 @@ def compare_players(guess: PlayerSummary, target: PlayerSummary) -> list[Compari
     guess_age = _calculate_age(guess.date_of_birth)
     target_age = _calculate_age(target.date_of_birth)
     return [
-        _compare_text("Club", guess.current_club_name, target.current_club_name, "club"),
-        _compare_text("Country", guess.country_of_birth, target.country_of_birth, "country"),
-        _compare_text("League", guess.competition_name, target.competition_name, "league"),
-        _compare_text("Position", guess.main_position or guess.position, target.main_position or target.position, "position"),
-        _compare_numeric("Age", guess_age, target_age, "age"),
+        _compare_text("Klub", guess.current_club_name, target.current_club_name, "club"),
+        _compare_text("Kraj", guess.country_of_birth, target.country_of_birth, "country"),
+        _compare_text("Liga", guess.competition_name, target.competition_name, "league"),
+        _compare_text("Pozycja", guess.main_position or guess.position, target.main_position or target.position, "position"),
+        _compare_numeric("Wiek", guess_age, target_age, "age"),
     ]
 
 

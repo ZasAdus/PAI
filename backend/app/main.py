@@ -41,7 +41,7 @@ app.add_middleware(
 
 # ---------- Health ----------
 
-@app.get("/api/health", response_model=HealthResponse)
+@app.get("/api/health", response_model=HealthResponse, tags=["Health"])
 def health():
     return HealthResponse(ok=True)
 
@@ -52,7 +52,7 @@ class UserCreate(BaseModel):
     username: str
     password: str
 
-@app.post("/api/auth/register")
+@app.post("/api/auth/register", tags=["Auth"]   )
 def register(user: UserCreate):
     try:
         existing_user = database.fetch_one("SELECT * FROM users WHERE username = :username", {"username": user.username})
@@ -72,7 +72,7 @@ def register(user: UserCreate):
             raise e
         raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
 
-@app.post("/api/auth/login")
+@app.post("/api/auth/login", tags=["Auth"])
 def login(form_data: OAuth2PasswordRequestForm = Depends()):
     user = database.fetch_one("SELECT * FROM users WHERE username = :username", {"username": form_data.username})
     if not user or not auth.verify_password(form_data.password, user["hashed_password"]):
@@ -81,7 +81,7 @@ def login(form_data: OAuth2PasswordRequestForm = Depends()):
     access_token = auth.create_access_token(data={"sub": user["username"]})
     return {"access_token": access_token, "token_type": "bearer"}
 
-@app.get("/api/auth/me")
+@app.get("/api/auth/me", tags=["Auth"])
 def read_users_me(current_user: dict = Depends(auth.get_current_user)):
     return {"username": current_user["username"]}
 
@@ -99,7 +99,7 @@ def _resolve_user_id(token: str | None) -> int | None:
     return user_id
 
 
-@app.get("/api/players/search")
+@app.get("/api/players/search", tags=["Players"])
 def search_players(
     q: str = Query(..., min_length=1),
     limit: int = Query(50, ge=1, le=50),
@@ -108,7 +108,7 @@ def search_players(
     return {"items": [p.dict() for p in items]}
 
 
-@app.get("/api/clubs/search")
+@app.get("/api/clubs/search", tags=["Clubs"])
 def search_clubs(
     q: str = Query(..., min_length=1),
     limit: int = Query(10, ge=1, le=20),
@@ -119,14 +119,14 @@ def search_clubs(
 
 # ---------- Game ----------
 
-@app.post("/api/game/daily/start")
+@app.post("/api/game/daily/start", tags=["Game"])
 def start_game(session_id: str = Query(...), token: str = Depends(auth.oauth2_scheme_optional)):
     user_id = _resolve_user_id(token)
     state = services.start_daily_game(session_id, user_id=user_id)
     return state.dict()
 
 
-@app.post("/api/game/daily/guess")
+@app.post("/api/game/daily/guess", tags=["Game"])
 def guess(body: GuessRequest, token: str = Depends(auth.oauth2_scheme_optional)):
     user_id = _resolve_user_id(token)
     try:
@@ -137,7 +137,7 @@ def guess(body: GuessRequest, token: str = Depends(auth.oauth2_scheme_optional))
     return {"state": state.dict(), "message": message}
 
 
-@app.post("/api/game/club-daily/start")
+@app.post("/api/game/club-daily/start", tags=["Game"])
 def start_club_game(session_id: str = Query(...), token: str = Depends(auth.oauth2_scheme_optional)):
     user_id = _resolve_user_id(token)
     try:
@@ -147,7 +147,7 @@ def start_club_game(session_id: str = Query(...), token: str = Depends(auth.oaut
     return state.dict()
 
 
-@app.post("/api/game/club-daily/guess")
+@app.post("/api/game/club-daily/guess", tags=["Game"])
 def guess_club(body: ClubGuessRequest, token: str = Depends(auth.oauth2_scheme_optional)):
     user_id = _resolve_user_id(token)
     try:
@@ -158,7 +158,7 @@ def guess_club(body: ClubGuessRequest, token: str = Depends(auth.oauth2_scheme_o
     return {"state": state.dict(), "message": message}
 
 
-@app.get("/api/leaderboard")
+@app.get("/api/leaderboard", tags=["Leaderboard"])
 def get_leaderboard(game_type: str = Query("all")):
     normalized = game_type.strip().lower()
     if normalized not in {"all", "player", "club"}:
@@ -166,7 +166,7 @@ def get_leaderboard(game_type: str = Query("all")):
     return services.get_leaderboard(normalized)
 
 
-@app.get("/api/stats/daily")
+@app.get("/api/stats/daily", tags=["Stats"])
 def get_daily_stats(game_type: str = Query("player")):
     normalized = game_type.strip().lower()
     if normalized not in {"player", "club"}:
